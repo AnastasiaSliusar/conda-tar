@@ -1,11 +1,11 @@
 const path = require('path');
 
 module.exports = {
-    mode: 'development', // or 'production'
+    mode: 'development',
     entry: './src/index.js',
     output: {
         filename: 'bundle.js',
-        path: path.resolve(__dirname, 'dist'), // Output directory
+        path: path.resolve(__dirname, 'dist'),
     },
     module: {
         rules: [
@@ -21,5 +21,5 @@ module.exports = {
             },
         ],
     },
-    devtool: 'source-map', // Helpful for debugging
+    devtool: 'source-map',
 };
