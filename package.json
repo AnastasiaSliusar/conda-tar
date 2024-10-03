@@ -1,0 +1,31 @@
+{
+  "name": "untar-example",
+  "version": "1.0.0",
+  "description": "A simple project to untar .tar.bz2 files in the frontend using Webpack.",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --mode development",
+    "start": "webpack serve --mode development"
+  },
+  "keywords": [
+    "untar",
+    "bzip2",
+    "tar",
+    "webpack",
+    "frontend"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/preset-env": "^7.16.0",
+    "babel-loader": "^8.2.3",
+    "webpack": "^5.68.0",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.7.0"
+  },
+  "dependencies": {
+    "bzip2-js": "^1.0.1",
+    "tar-js": "^1.2.0"
+  }
+}
