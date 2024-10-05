@@ -25,7 +25,7 @@
     "webpack-dev-server": "^4.7.0"
   },
   "dependencies": {
-    "bzip2-js": "^1.0.1",
-    "tar-js": "^1.2.0"
+    "html-webpack-plugin": "^5.6.0",
+    "tar-stream": "^3.1.7"
   }
 }

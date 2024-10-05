@@ -1,15 +1,12 @@
 
 import tar from 'tar-stream';
-//import { decompress } from 'bz2';
-import compressjs from 'compressjs';
+import { decompress } from './bz2';
 
 const condaPackageUrl = 'https://conda.anaconda.org/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2';
 
 
 function decompressBzip2(data) {
-    var algorithm = compressjs.Bzip2;
-    var decompressedData = algorithm.decompressFile(data);
-    return decompressedData;
+    return decompress(data);
 }
 
 async function fetchByteArray(url){
@@ -17,9 +14,9 @@ async function fetchByteArray(url){
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
-    let arrayBuffer = await response.arrayBuffer()
-    let byte_array = new Uint8Array(arrayBuffer)
-    return byte_array
+    let arrayBuffer = await response.arrayBuffer();
+    let byte_array = new Uint8Array(arrayBuffer);
+    return byte_array;
 }
 
 export async function fetchAndUntarBz2Package(url) {
@@ -28,17 +25,17 @@ export async function fetchAndUntarBz2Package(url) {
         
         const compressedData = await fetchByteArray(url);
         console.log(compressedData);
-        const decompressedData = decompressBzip2(compressedData); 
-        console.log('decompressedData');
+        const decompressedData = decompressBzip2(compressedData);
         const extract = tar.extract();
         const files = {}; 
 
         extract.on('entry', function(header, stream, next) {
             const fileName = header.name;
             let fileContent = '';
-
+            console.log('fileName');
+            console.log(fileName);
             stream.on('data', function(chunk) {
-                fileContent += chunk.toString();
+                fileContent +=new TextDecoder().decode(chunk);
             });
 
             stream.on('end', function() {
