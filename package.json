@@ -1,11 +1,12 @@
 {
-  "name": "untar-example",
+  "name": "conda-exctract",
   "version": "1.0.0",
-  "description": "A simple project to untar .tar.bz2 files in the frontend using Webpack.",
+  "description": "A simple project to unpackage .tar.bz2 and .conda files in the frontend",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --mode development",
-    "start": "webpack serve --mode development"
+    "clean": "rimraf dist",
+    "build": "npm run clean && cross-env NODE_ENV=development webpack --mode development",
+    "start": "cross-env NODE_ENV=development webpack serve --mode development"
   },
   "keywords": [
     "untar",
@@ -14,15 +15,18 @@
     "webpack",
     "frontend"
   ],
-  "author": "Your Name",
+  "author": "Anastasiia Sliusar",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.16.0",
-    "@babel/preset-env": "^7.16.0",
+    "@babel/core": "^7.21.0",
+    "@babel/preset-env": "^7.21.0",
     "babel-loader": "^8.2.3",
-    "webpack": "^5.68.0",
-    "webpack-cli": "^4.9.1",
-    "webpack-dev-server": "^4.7.0"
+    "cross-env": "^7.0.3",
+    "exports-loader": "^5.0.0",
+    "rimraf": "^3.0.2",
+    "webpack": "^5.88.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-server": "^4.11.0"
   },
   "dependencies": {
     "html-webpack-plugin": "^5.6.0",
