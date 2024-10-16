@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
 
 module.exports = {
   entry: './src/index.js',
@@ -24,7 +25,27 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './src/index.html',
     }),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+      process: 'process/browser',
+    }),
   ],
+  resolve: {
+    fallback: {
+      "path": require.resolve("path-browserify"),
+      "crypto": require.resolve("crypto-browserify"),
+      "stream": require.resolve("stream-browserify"),
+      "buffer": require.resolve("buffer/"),
+      "process": require.resolve("process/browser"),
+      "assert": require.resolve("assert/"),
+      "http": require.resolve("stream-http"),
+      "https": require.resolve("https-browserify"),
+      "os": require.resolve("os-browserify/browser"),
+      "url": require.resolve("url/"),
+      "fs": require.resolve("browserify-fs"),
+      "vm": require.resolve("vm-browserify") 
+    }
+  },
   module: {
     rules: [
       {
@@ -39,12 +60,17 @@ module.exports = {
         loader: 'exports-loader',
         options: {
           type: 'module',
-          exports: 'libarchive',
+          exports: 'unpackaging',
         },
       },
       {
         test: /\.wasm$/,
         type: 'asset/resource',
+      },
+      {
+        test: /fib\.wasm$/,
+        type: `javascript/auto`,
+        loader: `file-loader`,
       },
     ],
   },

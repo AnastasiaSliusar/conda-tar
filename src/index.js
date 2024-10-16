@@ -3,8 +3,8 @@ import tar from 'tar-stream';
 import { decompress } from './bz2';
 import initializeWasm from './helper';
 
-//const condaPackageUrl = 'https://conda.anaconda.org/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2';
-const condaPackageUrl = "http://localhost:8888/_r-mutex-1.0.0-mro_2.conda";
+const condaPackageUrl = 'https://conda.anaconda.org/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2';
+//const condaPackageUrl = "http://localhost:8888/_r-mutex-1.0.0-mro_2.conda";
 
 function decompressBzip2(data) {
     return decompress(data);
@@ -68,49 +68,34 @@ export async function fetchAndUntarBz2Package(url) {
 async function unpackCondaFile() {
     try {
         const wasmModule = await initializeWasm();
-        console.dir(wasmModule);
+        let data = await fetchByteArray(condaPackageUrl);
+        console.log('Data downloaded:', data);
 
         if (wasmModule) {
-            let data = await fetchByteArray(condaPackageUrl);
-            console.log('Data downloaded:', data);
-            const archivePtr = wasmModule._malloc(data.length);
-            console.log('archivePtr');
-            console.dir(archivePtr);
-            wasmModule.HEAPU8.set(data, archivePtr);
+            const inputPtr = wasmModule._malloc(data.length);
+            wasmModule.HEAPU8.set(data, inputPtr);
+            const outputSizePtr = wasmModule._malloc(data.length);
 
-            const newArchive = wasmModule._archive_read_new();
-            if (newArchive === 0) {
-                console.error('Failed to create archive object');
-                wasmModule._free(archivePtr);
-                return;
-            }
-///
-            const archiveHandle = wasmModule._archive_read_open_memory(newArchive, archivePtr, data.length);
-            console.log('Archive handle:', archiveHandle);
+            const extractedDataPtr = wasmModule._extract_archive(inputPtr, data.length, outputSizePtr);
 
+            const extractedSize = wasmModule.getValue(outputSizePtr, 'i32');
 
-            if (archiveHandle === 0) {
-                console.error('Failed to open archive');
-                return;
+            console.log('Extracted size:', extractedSize);
+
+            if (extractedDataPtr === 0) {
+                throw new Error('Archive extraction failed.');
             }
 
-            let header;
-            while ((header = wasmModule._archive_read_next_header(archiveHandle)) !== 0) {
-                const size = wasmModule._archive_entry_size(header);
-                const pathname = wasmModule._archive_entry_pathname(header);
-                const buffer = new Uint8Array(size);
-                const bytesRead = wasmModule._archive_read_data(archiveHandle, buffer.byteOffset, size);
+            const extractedData = new Uint8Array(wasmModule.HEAPU8.subarray(extractedDataPtr, extractedDataPtr + extractedSize));
 
-                if (bytesRead > 0) {
-                    console.log(`Extracted: ${pathname}, Size: ${bytesRead}`);
-                }
-            }
+            wasmModule._free(inputPtr);
+            wasmModule._free(outputSizePtr);
+            wasmModule._free(extractedDataPtr);
 
-            wasmModule._archive_read_close(archiveHandle);
-            wasmModule._free(archivePtr);
+            return extractedData;
         }
     } catch (error) {
-        console.error('Error during unpacking:', error);
+        console.log('Error during unpacking:', error);
     }
 }
 

@@ -1,13 +1,13 @@
-
-import libarchive from "../lib/libarchive.js";
-import libarchiveWasm from "../lib/libarchive.wasm";
+import unpackaging from "../lib/unpackaging";
+import unpackagingWasm from "../lib/unpackaging.wasm";
 
 const initializeWasm = async () => {
     try {
-        const wasmModule = await libarchive({
+        const wasmModule = await unpackaging({
             locateFile(path) {
+                console.log('path', path);
                 if (path.endsWith('.wasm')) {
-                    return libarchiveWasm;
+                    return unpackagingWasm;
                 }
                 return path;
             },
