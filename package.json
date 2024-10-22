@@ -1,5 +1,5 @@
 {
-  "name": "conda-exctract",
+  "name": "unpack",
   "version": "1.0.0",
   "description": "A simple project to unpackage .tar.bz2 and .conda files in the frontend",
   "main": "index.js",
