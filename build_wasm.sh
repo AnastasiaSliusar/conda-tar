@@ -2,46 +2,114 @@
 
 set -e
 
-micromamba create -n unpack-env
-micromamba activate unpack-env
+THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+PREFIX_DIR=$THIS_DIR/wasm-unpack-env
+EMSDK_DIR=$THIS_DIR/libs/emsdk
+ZSTD_DIR=$THIS_DIR/libs/zstd
+ZLIB_DIR=$THIS_DIR/libs/zlib-1.2.13
+BZIP2_DIR=$THIS_DIR/libs/bzip2-1.0.8
+LIBARCHIVE_DIR=$THIS_DIR/libs/libarchive-3.7.6
 
-git clone https://github.com/emscripten-core/emsdk.git
-cd emsdk
-./emsdk install "3.1.45"
-./emsdk activate "3.1.45"
-source ./emsdk_env.sh
-cd ..
+if [ -z "$MAMBA_EXE" ]; then
+    echo "Error: MAMBA_EXE environment variable is not set."
+    exit 1
+fi
 
-export PREFIX=$MAMBA_ROOT_PREFIX/envs/unpack-env
+cd $THIS_DIR
+
+rm -rf $PREFIX_DIR
+
+echo "Start of compiling emscripten-forge"
+
+if [ ! -d "$EMSDK_DIR" ]; then
+    echo "Cloning emsdk repository..."
+    git clone https://github.com/emscripten-core/emsdk.git
+    cd $EMSDK_DIR
+    ./emsdk install "3.1.45"
+    ./emsdk activate "3.1.45"
+    cd ..
+else
+    echo "$EMSDK_DIR directory already exists. Skipping clone."
+fi
+
+source $EMSDK_DIR/emsdk_env.sh
+echo "Finish of compiling emscripten-forge"
+
+if true; then
+    echo "Creating wasm env at $PREFIX_DIR"
+    $MAMBA_EXE create -p $PREFIX_DIR \
+            --platform=emscripten-wasm32 \
+            --yes
+fi
+
+export PREFIX=$PREFIX_DIR
 export CPPFLAGS="-I$PREFIX/include"
 export LDFLAGS="-L$PREFIX/lib"
 export LDLIBS="-lbz2 -lz -lzstd"
 
-wget https://sourceware.org/pub/bzip2/bzip2-latest.tar.gz
-tar -xzf bzip2-latest.tar.gz
-cd bzip2-1.0.8
-make CC="emcc"
+echo "Start of compiling zstd"
+if [ ! -d "$ZSTD_DIR" ]; then
+    echo "Cloning zstd repository..."
+    git clone https://github.com/facebook/zstd.git
+else
+    echo "$ZSTD_DIR directory already exists. Skipping clone."
+fi
+
+cd $ZSTD_DIR
 emmake make
 emmake make install PREFIX=$PREFIX
 cd ..
+echo "Finish of compiling zstd"
 
-git clone https://github.com/facebook/zstd.git
-cd zstd
-emmake make
-emmake make install PREFIX=$PREFIX
-cd ..
+echo "Start of compiling zlib"
+if [ ! -d "$ZLIB_DIR" ]; then
+    if [ ! -f "v1.2.13.zip" ]; then
+        echo "Donwloading zlib and unzip it..."
+        wget https://github.com/madler/zlib/archive/v1.2.13.zip
+    fi
+    unzip v1.2.13.zip
+else
+    echo "$ZLIB_DIR directory already exists. Skipping downloading."
+fi
 
-wget https://github.com/madler/zlib/archive/v1.2.13.zip
-unzip v1.2.13.zip
-cd zlib-1.2.13
+cd $ZLIB_DIR
 emconfigure ./configure --prefix=$PREFIX
 emmake make
 emmake make install
 cd ..
+echo "Finish of compiling zlib"
 
-wget https://www.libarchive.org/downloads/libarchive-3.7.6.tar.gz
-tar -xzf libarchive-3.7.6.tar.gz
-cd libarchive-3.7.6
+echo "Start of compiling bzip2"
+if [ ! -d "$BZIP2_DIR" ]; then
+    if [ ! -f "bzip2-latest.tar.gz" ]; then
+        echo "Downloading bzip2 and untar it..."
+        wget https://sourceware.org/pub/bzip2/bzip2-latest.tar.gz
+    fi
+    tar -xzf bzip2-latest.tar.gz
+else
+    echo "$BZIP2_DIR directory already exists. Skipping downloading."
+fi
+
+cd $BZIP2_DIR
+make CC="emcc"
+emmake make
+emmake make install PREFIX=$PREFIX
+cd ..
+echo "Finish of compiling bzip2"
+
+echo "Start of compiling libarchive"
+
+if [ ! -d "$LIBARCHIVE_DIR" ]; then
+    if [ ! -f "libarchive-3.7.6.tar.gz" ]; then
+        echo "Downloading libarchive and untar it..."
+        wget https://www.libarchive.org/downloads/libarchive-3.7.6.tar.gz
+    fi
+    tar -xzf libarchive-3.7.6.tar.gz
+else
+    echo "$LIBARCHIVE_DIR directory already exists. Skipping downloading."
+fi
+
+cd $LIBARCHIVE_DIR
 emconfigure ./configure \
     --disable-shared \
     --enable-static \
@@ -51,8 +119,14 @@ emconfigure ./configure \
 
 emmake make
 emmake make install
+
+echo "Finish of compiling libarchive"
+
 cd ..
 
+cd $THIS_DIR
+
+echo "Start of compiling unpacking"
 emcc unpacking.c -o unpacking.js \
     $CPPFLAGS $LDFLAGS \
     ${PREFIX}/lib/libarchive.a \
