@@ -5,4 +5,5 @@ npm-debug.log
 # Build output
 dist/
 libs/
+wasm-unpack-env
 

@@ -8,7 +8,6 @@ const condaPackageUrl = 'https://conda.anaconda.org/conda-forge/linux-64/_libgcc
 export class Unpack {
     constructor() {
         this._wasmModule = null;
-        this._init();
     }
 
     async fetchByteArray(url) {
@@ -61,6 +60,7 @@ export class Unpack {
 
     async unpackCondaFileByUrl(url) {
         let extractedData;
+        this._init();
         try {
             let data = await this.fetchByteArray(url);
             console.log('Data downloaded:', data);
@@ -73,4 +73,5 @@ export class Unpack {
     }
 }
 
-export default Unpack;
+let test = new Unpack;
+test.unpackCondaFileByUrl(condaPackageUrl);
