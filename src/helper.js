@@ -1,5 +1,5 @@
-import unpackaging from "../lib/unpackaging";
-import unpackagingWasm from "../lib/unpackaging.wasm";
+import unpackaging from "../lib/unpack";
+import unpackagingWasm from "../lib/unpack.wasm";
 
 const initializeWasm = async () => {
     try {

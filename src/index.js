@@ -26,6 +26,7 @@ export class Unpack {
 
     extractData(data) {
         let extractedData;
+        this._init();
         try {
             if (!this._wasmModule) {
                 throw new Error('WASM module not initialized.');
@@ -60,7 +61,6 @@ export class Unpack {
 
     async unpackCondaFileByUrl(url) {
         let extractedData;
-        this._init();
         try {
             let data = await this.fetchByteArray(url);
             console.log('Data downloaded:', data);

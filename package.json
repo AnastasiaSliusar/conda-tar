@@ -4,8 +4,9 @@
   "description": "A simple project to unpackage .tar.bz2 and .conda files in the frontend",
   "main": "index.js",
   "scripts": {
+    "build:wasm": "node build_wasm.js",
     "clean": "rimraf dist",
-    "build": "npm run clean && cross-env NODE_ENV=development webpack --mode development",
+    "build": "npm run clean && npm run build:wasm && cross-env NODE_ENV=development webpack --mode development",
     "start": "cross-env NODE_ENV=development webpack serve --mode development"
   },
   "keywords": [

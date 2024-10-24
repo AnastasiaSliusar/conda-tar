@@ -5,6 +5,7 @@ set -e
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ENV_FOLDER="wasm-unpack-env"
 LIBS_FOLDER="libs"
+WASM_LIB="lib"
 
 if [ -d "$ENV_FOLDER" ]; then
     echo "Folder '$ENV_FOLDER' already exists."
@@ -68,8 +69,13 @@ export LDFLAGS="-L$PREFIX/lib"
 export LDLIBS="-lbz2 -lz -lzstd"
 
 cd $THIS_DIR
-echo "Start of compiling unpacking"
-emcc unpackaging.c -o unpackaging.js \
+
+echo "Start of compiling unpack.c"
+
+echo "Cleaning lib folder for new .js and .wasm files"
+rm -rf $WASM_LIB/*
+
+emcc unpack.c -o $WASM_LIB/unpack.js \
     $CPPFLAGS $LDFLAGS \
     ${PREFIX}/lib/libarchive.a \
     ${PREFIX}/lib/libz.a ${PREFIX}/lib/libbz2.a ${PREFIX}/lib/libzstd.a ${PREFIX}/lib/libiconv.a\
