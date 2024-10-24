@@ -7,3 +7,4 @@ dist/
 libs/
 wasm-unpack-env
 
+.yarn
