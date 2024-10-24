@@ -2,7 +2,11 @@
 node_modules/
 npm-debug.log
 
-# Build output
+# Build output directories
+dist/
+lib/
 libs/
-wasm-unpack-env
+
+# The wasm-unpack-env environment
+wasm-unpack-env/
 
