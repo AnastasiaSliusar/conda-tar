@@ -72,8 +72,15 @@ cd $THIS_DIR
 
 echo "Start of compiling unpack.c"
 
-echo "Cleaning lib folder for new .js and .wasm files"
-rm -rf $WASM_LIB/*
+if [ -d "$WASM_LIB" ]; then
+    echo "Folder '$WASM_LIB' already exists."
+    echo "Cleaning lib folder for new .js and .wasm files"
+    rm -rf $WASM_LIB/*
+else
+    echo "Folder '$WASM_LIB' does not exist. Creating it now..."
+    mkdir "$WASM_LIB"
+    echo "Folder '$WASM_LIB' created."
+fi
 
 emcc unpack.c -o $WASM_LIB/unpack.js \
     $CPPFLAGS $LDFLAGS \
