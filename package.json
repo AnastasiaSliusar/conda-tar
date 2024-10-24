@@ -2,11 +2,15 @@
   "name": "untarjs",
   "version": "1.0.0",
   "description": "A simple project to unzip .zip, .tar.bz2 and .conda files in the front-end",
-  "main": "index.js",
+  "main": "dist/bundle.js",
+  "files": [
+    "dist/*.{d.ts,js,wasm,txt}"
+  ],
   "scripts": {
     "build:wasm": "node build_wasm.js",
     "clean": "rimraf dist",
     "build": "yarn run clean && yarn run build:wasm && cross-env NODE_ENV=development webpack --mode development",
+    "build:prod": "yarn run clean && yarn run build:wasm && webpack",
     "start": "cross-env NODE_ENV=development webpack serve --mode development"
   },
   "keywords": [
